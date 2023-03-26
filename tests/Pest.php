@@ -1,5 +1,5 @@
 <?php
 
-use VendorName\Skeleton\Tests\TestCase;
+use Upcoach\UpstartForLaravel\Tests\TestCase;
 
 uses(TestCase::class)->in(__DIR__);

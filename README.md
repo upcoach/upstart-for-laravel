@@ -1,68 +1,115 @@
-# :package_description
+# Get started developing apps quickly for the upcoach platform with this package.
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/:vendor_slug/:package_slug.svg?style=flat-square)](https://packagist.org/packages/:vendor_slug/:package_slug)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/:vendor_slug/:package_slug/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/:vendor_slug/:package_slug/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/:vendor_slug/:package_slug/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/:vendor_slug/:package_slug/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/:vendor_slug/:package_slug.svg?style=flat-square)](https://packagist.org/packages/:vendor_slug/:package_slug)
-<!--delete-->
----
-This repo can be used to scaffold a Laravel package. Follow these steps to get started:
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/upcoach/upstart-for-laravel.svg?style=flat-square)](https://packagist.org/packages/upcoach/upstart-for-laravel)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/upcoach/upstart-for-laravel/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/upcoach/upstart-for-laravel/actions?query=workflow%3Arun-tests+branch%3Amain)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/upcoach/upstart-for-laravel/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/upcoach/upstart-for-laravel/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
+[![Total Downloads](https://img.shields.io/packagist/dt/upcoach/upstart-for-laravel.svg?style=flat-square)](https://packagist.org/packages/upcoach/upstart-for-laravel)
 
-1. Press the "Use this template" button at the top of this repo to create a new repo with the contents of this skeleton.
-2. Run "php ./configure.php" to run a script that will replace all placeholders throughout all the files.
-3. Have fun creating your package.
-4. If you need help creating a package, consider picking up our <a href="https://laravelpackage.training">Laravel Package Training</a> video course.
----
-<!--/delete-->
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+This package provides a starting point for developing applications for the upcoach platform. It contains useful components, such as an API client, request validation, and webhook controllers, to help you get started smoothly.
 
-## Support us
+## Features
 
-[<img src="https://github-ads.s3.eu-central-1.amazonaws.com/:package_name.jpg?t=1" width="419px" />](https://spatie.be/github-ad-click/:package_name)
+### Installation and Webhook Management
 
-We invest a lot of resources into creating [best in class open source packages](https://spatie.be/open-source). You can support us by [buying one of our paid products](https://spatie.be/open-source/support-us).
+To use this package with upcoach, you will need to provide an Installation URL and a Webhook URL in the upcoach developer portal.
+This package provides two endpoints in the `routes/api.php` file to handle these URLs automatically:
 
-We highly appreciate you sending us a postcard from your hometown, mentioning which of our package(s) you are using. You'll find our address on [our contact page](https://spatie.be/about-us). We publish all received postcards on [our virtual postcard wall](https://spatie.be/open-source/postcards).
+- `POST /api/upcoach-install` 
+- `POST /api/upcoach-webhooks:`
 
-## Installation
+To set up your application, use the following URLs:
 
-You can install the package via composer:
+- `https://your-application-address.com/api/upcoach-install` for the Installation URL.
+- `https://your-application-address.com/api/upcoach-webhooks` for the Webhook URL.
 
-```bash
-composer require :vendor_slug/:package_slug
-```
+### Middleware for upcoach Requests 
 
-You can publish and run the migrations with:
+To validate incoming requests from upcoach, you can use the `Upcoach\UpstartForLaravel\Http\Middleware\EnsureUpcoachRequestIsValid` middleware. This middleware will validate the signature of the request, and if it is valid, it will add the installation to the request object.
 
-```bash
-php artisan vendor:publish --tag=":package_slug-migrations"
-php artisan migrate
-```
+### API Client
 
-You can publish the config file with:
+Once the app is installed, an installation request is initiated that includes an API token. This token is saved in the database through the installation model, along with other relevant information. You can utilize this token to access the required API endpoints (scoped to the installed organization) when querying the upcoach API.
 
-```bash
-php artisan vendor:publish --tag=":package_slug-config"
-```
-
-This is the contents of the published config file:
+Here's how you can use the provided upcoach API client:
 
 ```php
-return [
-];
+$installation = Upcoach\UpstartForLaravel\Models\Installation::query()
+    ->forOrganization($organizationId)
+    ->firstOrFail();
 ```
 
-Optionally, you can publish the views using
+Or if you are using the `Upcoach\UpstartForLaravel\Http\Middleware\EnsureUpcoachRequestIsValid` middleware, you can access the installation via the request object:
 
+```php
+$installation = $request->installation;
+```
+
+Then you can use the upcoach API client to query the API:
+
+```php
+$client = new Upcoach\UpstartForLaravel\Api\Client($installation)
+$programInfo = $client->getProgramInfo($programId);
+```
+
+## Getting Started
+
+To get started with this package, you will need to follow these steps:
+
+- Sign up for the upcoach developer program on the [upcoach developer portal](https://developers.upcoach.com).
+- Create a new application on the developer portal.
+- Install the package using the following command:
 ```bash
-php artisan vendor:publish --tag=":package_slug-views"
+composer require upcoach/upstart-for-laravel
 ```
+- Publish the configuration and migration files by running this command:
+```bash
+php artisan upstart-for-laravel:install
+```
+- Configure your Laravel application by adding the following details to your .env file:
+```bash
+UPCOACH_APP_ID=
+UPCOACH_APP_SIGNING_SECRET=
+```
+You can find these details in the developer information section of your application on the developer portal.
 
 ## Usage
 
+- Complete the [Getting Started](#getting-started) steps above.
+- Create a new block on the developer portal.
+- Create a new route in your application to handle the block.
+- Add the `Upcoach\UpstartForLaravel\Http\Middleware\EnsureUpcoachRequestIsValid` middleware to the route.
 ```php
-$variable = new VendorName\Skeleton();
-echo $variable->echoPhrase('Hello, VendorName!');
+Route::group(['middleware' => [EnsureUpcoachRequestIsValid::class]], function () {
+    Route::get('/your-block-connector-path', YourBlockController::class);
+});
+```
+- Create a new controller for the route.
+```php
+class YourBlockController extends Controller
+{
+    public function __invoke(Request $request)
+    {
+        /**
+         * Parameters coming from the upcoach
+         * app_id
+         * block_id
+         * program_block_id
+         * organization_id
+         * program_id
+         * user_id
+         * user_role
+         */
+
+        // You can access the installation via the request object.
+        $installation = $request->installation;
+
+        // You can use the installation to query the upcoach API if needed.
+        $client = new Upcoach\UpstartForLaravel\Api\Client($installation);
+        $programInfo = $client->getProgramInfo($request->program_id);
+
+        // Your code here.
+    }
+}
 ```
 
 ## Testing
@@ -85,7 +132,7 @@ Please review [our security policy](../../security/policy) on how to report secu
 
 ## Credits
 
-- [:author_name](https://github.com/:author_username)
+- [upcoach](https://github.com/upcoach)
 - [All Contributors](../../contributors)
 
 ## License
