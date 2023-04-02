@@ -2,7 +2,6 @@
 
 namespace Upcoach\UpstartForLaravel\Http\Middleware;
 
-use Illuminate\Support\Facades\Validator;
 use Spatie\UrlSigner\Md5UrlSigner;
 use Upcoach\UpstartForLaravel\Models\Installation;
 
@@ -10,57 +9,33 @@ class EnsureUpcoachRequestIsValid
 {
     public function handle($request, $next)
     {
-        $this->validateRequest($request);
+        $this->renameParameters($request);
         $this->validateSignature($request);
         $this->validateInstallation($request);
 
-        return $next($request);
+        $response = $next($request);
+        if (config('upstart-for-laravel.allow_all_domains_as_ancestors_on_blocks')) {
+            $response->headers->set('Content-Security-Policy', 'frame-ancestors https://*');
+        }
+
+        return $response;
     }
 
-    private function validateRequest($request)
+    private function renameParameters($request)
     {
-        $validationRules = collect([
-            'a' => [
-                'parameter' => 'app_id',
-                'rules' => ['required'],
-            ],
-            'b' => [
-                'parameter' => 'block_id',
-                'rules' => ['required'],
-            ],
-            'pb' => [
-                'parameter' => 'program_block_id',
-                'rules' => ['required'],
-            ],
-            'o' => [
-                'parameter' => 'organization_id',
-                'rules' => ['required'],
-            ],
-            'u' => [
-                'parameter' => 'user_id',
-                'rules' => ['required'],
-            ],
-            'p' => [
-                'parameter' => 'program_id',
-                'rules' => ['required'],
-            ],
-            'r' => [
-                'parameter' => 'user_role',
-                'rules' => ['nullable'],
-            ],
+        collect([
+            'a' => 'app_id',
+            'o' => 'organization_id',
+            'p' => 'program_id',
+            'b' => 'block_id',
+            'pb' => 'program_block_id',
+            'u' => 'user_id',
+            'r' => 'user_role',
         ])
             ->each(function ($replace, $find) use ($request) {
-                $request->query->add([$replace['parameter'] => $request->query($find)]);
+                $request->query->add([$replace => $request->query($find)]);
                 $request->query->remove($find);
-            })
-            ->pluck('rules', 'parameter')
-            ->toArray();
-
-        $validator = Validator::make($request->all(), $validationRules);
-
-        if ($validator->fails()) {
-            abort(422, 'Request is missing required parameters');
-        }
+            });
     }
 
     private function validateSignature($request)
