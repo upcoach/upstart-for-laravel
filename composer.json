@@ -1,6 +1,6 @@
 {
     "name": "upcoach/upstart-for-laravel",
-    "description": "Get started quickly developing apps for the Upcoach platform with this package.",
+    "description": "Get started developing apps quickly for the upcoach platform with this package.",
     "keywords": [
         "upcoach",
         "laravel",
