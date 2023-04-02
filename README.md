@@ -92,10 +92,10 @@ class YourBlockController extends Controller
         /**
          * Parameters coming from the upcoach
          * app_id
-         * block_id
-         * program_block_id
          * organization_id
          * program_id
+         * block_id
+         * program_block_id
          * user_id
          * user_role
          */
