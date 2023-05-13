@@ -3,6 +3,7 @@
 namespace Upcoach\UpstartForLaravel\Tests;
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Encryption\Encrypter;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Upcoach\UpstartForLaravel\UpstartForLaravelServiceProvider;
 
@@ -27,6 +28,7 @@ class TestCase extends Orchestra
     public function getEnvironmentSetUp($app)
     {
         config()->set('database.default', 'testing');
+        config()->set('app.key', Encrypter::generateKey(config('app.cipher')));
         config()->set('upstart-for-laravel.app_id', fake()->uuid);
         config()->set('upstart-for-laravel.signing_secret', fake()->uuid);
 
