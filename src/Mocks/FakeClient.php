@@ -45,16 +45,16 @@ class FakeClient extends Client
                         'created_at' => fake()->unixTime,
                         'info' => [],
                     ])
-                    ->map(function ($member, $index) use ($caller) {
-                        if ($index !== 0) {
+                        ->map(function ($member, $index) use ($caller) {
+                            if ($index !== 0) {
+                                return $member;
+                            }
+
+                            $member['id'] = 'u-'.$caller['args'][0];
+                            $member['role'] = 'coach';
+
                             return $member;
-                        }
-
-                        $member['id'] = 'u-'.$caller['args'][0];
-                        $member['role'] = 'coach';
-
-                        return $member;
-                    })->toArray(),
+                        })->toArray(),
                 ], 200),
                 'getProgramMemberInfo' => Http::response([
                     'data' => [
