@@ -19,6 +19,9 @@
         <testsuite name="Upcoach Test Suite">
             <directory>tests</directory>
         </testsuite>
+        <testsuite name="Source">
+            <directory suffix="Test.php">./src</directory>
+        </testsuite>
     </testsuites>
     <coverage>
         <include>
