@@ -1,6 +1,6 @@
 <?php
 
-namespace  Upcoach\UpstartForLaravel\Events;
+namespace Upcoach\UpstartForLaravel\Events;
 
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;

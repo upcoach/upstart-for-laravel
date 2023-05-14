@@ -62,7 +62,7 @@ class Client
         );
     }
 
-    private function httpMacro(): PendingRequest
+    public function httpMacro(): PendingRequest
     {
         return Http::baseUrl(config('upstart-for-laravel.api_url'))
             ->throw()
