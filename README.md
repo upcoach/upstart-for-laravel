@@ -47,7 +47,7 @@ $installation = $request->installation;
 Then you can use the upcoach API client to query the API:
 
 ```php
-$client = new Upcoach\UpstartForLaravel\Api\Client($installation)
+$client =  app(Upcoach\UpstartForLaravel\Api\Client::class, [$installation]);
 $programInfo = $client->getProgramInfo($programId);
 ```
 
@@ -104,7 +104,7 @@ class YourBlockController extends Controller
         $installation = $request->installation;
 
         // You can use the installation to query the upcoach API if needed.
-        $client = new Upcoach\UpstartForLaravel\Api\Client($installation);
+        $client = app(Upcoach\UpstartForLaravel\Api\Client::class, [$installation]);
         $programInfo = $client->getProgramInfo($request->program_id);
 
         // Your code here.
@@ -112,15 +112,76 @@ class YourBlockController extends Controller
 }
 ```
 
+## Developer Mode & Testing
+
+This package provides features to help you test your application without having to install it on the upcoach app.
+
+### Enabling Developer Mode
+- To enable developer mode, you can set the UPCOACH_DEVELOPER_MODE environment variable. When developer mode is enabled, the Client class is replaced with FakeClient, and API calls are mocked. For more information, refer to the `Upcoach\UpstartForLaravel\Mocks\FakeClient` class.
+```bash
+UPCOACH_DEVELOPER_MODE=true
+```
+
+### Simulating upcoach Requests
+
+- You can use the `upstart:simulate` artisan command to simulate upcoach requests. This command supports interactive mode, where you can answer the questions directly in the console. Run the following command to start the interactive mode:
+
+```bash
+php artisan upstart:simulate
+```
+
+Alternatively, you can simulate a request directly by providing the required options. Here's an example:
+```bash
+php artisan upstart:simulate --type=block --url=your-block-connector-path
+```
+
+You can also provide a payload for overriding the default payload parameters:
+```bash
+php artisan upstart:simulate --type=block --url=your-block-connector-path --payload='{"o": "custom-organization-id"}'
+```
+
+This command is also useful for testing settings pages:
+```bash
+php artisan upstart:simulate --type=settings --url=your-settings-page
+```
+
+After running the `upstart:simulate` command, it will display the URL that you can open in your browser to simulate the request. Additionally, it will output the full command, including all payload parameters, which you can use directly from the console for subsequent requests without having to answer the questions and obtain the same URL.
+
+## Troubleshooting
+
+### CSRF Token Mismatch
+
+If you are getting a `CSRF Token Mismatch` error in the upcoach app, you can fix it by adding the following code to the `app/Http/Middleware/VerifyCsrfToken.php` file:
+```php
+/**
+     * Create a new "XSRF-TOKEN" cookie that contains the CSRF token.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  array  $config
+     * @return \Symfony\Component\HttpFoundation\Cookie
+     */
+    protected function newCookie($request, $config)
+    {
+        return new Cookie(
+            name: 'XSRF-TOKEN',
+            value: $request->session()->token(),
+            expire: $this->availableAt(60 * $config['lifetime']),
+            path: $config['path'],
+            domain: $config['domain'],
+            secure: true,
+            httpOnly: false,
+            raw: false,
+            sameSite: Cookie::SAMESITE_NONE
+        );
+    }
+```
+This will set the `SameSite` attribute of the CSRF cookie to `None` and set the `Secure` attribute to `true`. This will allow the upcoach app to send the CSRF cookie to your application. Otherwise, the upcoach app will not be able to send the CSRF cookie to your application in the iframe due to the `SameSite` attribute being set to `Lax` by default.
+
 ## Testing
 
 ```bash
 composer test
 ```
-
-## Changelog
-
-Please see [CHANGELOG](CHANGELOG.md) for more information on what has changed recently.
 
 ## Contributing
 

@@ -6,6 +6,7 @@ use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Upcoach\UpstartForLaravel\Factories\InstallationFactory;
 
 /**
  * @property int $id
@@ -34,5 +35,10 @@ class Installation extends Model
             'organization_id' => $organizationId,
             'token' => $token,
         ]);
+    }
+
+    protected static function newFactory()
+    {
+        return new InstallationFactory();
     }
 }
