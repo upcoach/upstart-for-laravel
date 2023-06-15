@@ -48,7 +48,7 @@ class Client
     {
         $response = $this
             ->httpMacro()
-            ->get("/apps/programs/$programId/members?id={$userId}");
+            ->get("/apps/programs/$programId/members?filter[id]={$userId}");
 
         return new ProgramMemberInfo(
             $response->json('data.0.id'),
