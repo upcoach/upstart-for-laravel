@@ -24,13 +24,13 @@ class Client
         return new ProgramInfo($response->json('program.id'), $response->json('program.name'));
     }
 
-    public function getProgramMembers(string $programId): array
+    public function getProgramMembers(string $programId, $params = []): array
     {
         $response = $this
             ->httpMacro()
-            ->get("/apps/programs/$programId/members");
+            ->get("/apps/programs/$programId/members", $params);
 
-        return collect($response->json('data'))
+        $data = collect($response->json('data'))
             ->map(fn (array $member) => new ProgramMemberInfo(
                 $member['id'],
                 $member['avatar'],
@@ -42,6 +42,16 @@ class Client
                 $member['info'] ?? [],
             ))
             ->toArray();
+
+        return [
+            'data' => $data,
+            'pagination' => [
+                'total' => $response->json('meta.total'),
+                'per_page' => $response->json('meta.per_page'),
+                'current_page' => $response->json('meta.current_page'),
+                'last_page' => $response->json('meta.last_page'),
+            ],
+        ];
     }
 
     public function getProgramMemberInfo(string $programId, string $userId): ?ProgramMemberInfo

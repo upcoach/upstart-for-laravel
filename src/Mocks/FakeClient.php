@@ -55,6 +55,12 @@ class FakeClient extends Client
 
                             return $member;
                         })->toArray(),
+                    'meta' => [
+                        'total' => 20,
+                        'per_page' => 10,
+                        'current_page' => 1,
+                        'last_page' => 2,
+                    ],
                 ], 200),
                 'getProgramMemberInfo' => Http::response([
                     'data' => [
