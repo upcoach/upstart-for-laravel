@@ -5,8 +5,10 @@ namespace Upcoach\UpstartForLaravel\Api;
 use Carbon\Carbon;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
+use Upcoach\UpstartForLaravel\Api\Data\PaginatedProgramMembers;
 use Upcoach\UpstartForLaravel\Api\Data\ProgramInfo;
 use Upcoach\UpstartForLaravel\Api\Data\ProgramMemberInfo;
+use Upcoach\UpstartForLaravel\Api\Data\QueryParams;
 use Upcoach\UpstartForLaravel\Models\Installation;
 
 class Client
@@ -24,13 +26,13 @@ class Client
         return new ProgramInfo($response->json('program.id'), $response->json('program.name'));
     }
 
-    public function getProgramMembers(string $programId): array
+    public function getProgramMembers(string $programId, QueryParams $queryParams = null): PaginatedProgramMembers
     {
         $response = $this
             ->httpMacro()
-            ->get("/apps/programs/$programId/members");
+            ->get("/apps/programs/$programId/members", $queryParams?->toArray());
 
-        return collect($response->json('data'))
+        $members = collect($response->json('data'))
             ->map(fn (array $member) => new ProgramMemberInfo(
                 $member['id'],
                 $member['avatar'],
@@ -42,6 +44,14 @@ class Client
                 $member['info'] ?? [],
             ))
             ->toArray();
+
+        return new PaginatedProgramMembers(
+            members: $members,
+            total: $response->json('meta.total'),
+            perPage: $response->json('meta.per_page'),
+            currentPage: $response->json('meta.current_page'),
+            lastPage: $response->json('meta.last_page'),
+        );
     }
 
     public function getProgramMemberInfo(string $programId, string $userId): ?ProgramMemberInfo

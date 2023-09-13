@@ -15,8 +15,8 @@ use Upcoach\UpstartForLaravel\Models\Installation;
 
 class WebhookController extends Controller
 {
-    use ValidatesWebhookRequestSignature;
     use ValidatesAppInstallationForOrganization;
+    use ValidatesWebhookRequestSignature;
 
     /**
      * Handles all the incoming webhook requests

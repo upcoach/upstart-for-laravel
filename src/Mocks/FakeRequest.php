@@ -7,7 +7,7 @@ use Upcoach\UpstartForLaravel\Models\Installation;
 
 class FakeRequest
 {
-    public function installationWebhook(?string $organizationId = null)
+    public function installationWebhook(string $organizationId = null)
     {
         $installation = Installation::factory()->make();
         $requestTime = now()->timestamp;
