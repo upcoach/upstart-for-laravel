@@ -21,7 +21,8 @@ it('gets program members', function () {
 
     $programId = 'program-id';
 
-    $programMembers = $client->getProgramMembers($programId)['data'];
+    $response = $client->getProgramMembers($programId);
+    $programMembers = $response->members;
 
     expect($programMembers)->toBeArray();
     expect($programMembers)->not()->toBeEmpty();

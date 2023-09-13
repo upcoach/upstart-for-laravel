@@ -5,8 +5,10 @@ namespace Upcoach\UpstartForLaravel\Api;
 use Carbon\Carbon;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
+use Upcoach\UpstartForLaravel\Api\Data\PaginatedProgramMembers;
 use Upcoach\UpstartForLaravel\Api\Data\ProgramInfo;
 use Upcoach\UpstartForLaravel\Api\Data\ProgramMemberInfo;
+use Upcoach\UpstartForLaravel\Api\Data\QueryParams;
 use Upcoach\UpstartForLaravel\Models\Installation;
 
 class Client
@@ -24,13 +26,13 @@ class Client
         return new ProgramInfo($response->json('program.id'), $response->json('program.name'));
     }
 
-    public function getProgramMembers(string $programId, $params = []): array
+    public function getProgramMembers(string $programId, QueryParams $queryParams = null): PaginatedProgramMembers
     {
         $response = $this
             ->httpMacro()
-            ->get("/apps/programs/$programId/members", $params);
+            ->get("/apps/programs/$programId/members", $queryParams?->toArray());
 
-        $data = collect($response->json('data'))
+        $members = collect($response->json('data'))
             ->map(fn (array $member) => new ProgramMemberInfo(
                 $member['id'],
                 $member['avatar'],
@@ -43,15 +45,13 @@ class Client
             ))
             ->toArray();
 
-        return [
-            'data' => $data,
-            'pagination' => [
-                'total' => $response->json('meta.total'),
-                'per_page' => $response->json('meta.per_page'),
-                'current_page' => $response->json('meta.current_page'),
-                'last_page' => $response->json('meta.last_page'),
-            ],
-        ];
+        return new PaginatedProgramMembers(
+            members: $members,
+            total: $response->json('meta.total'),
+            perPage: $response->json('meta.per_page'),
+            currentPage: $response->json('meta.current_page'),
+            lastPage: $response->json('meta.last_page'),
+        );
     }
 
     public function getProgramMemberInfo(string $programId, string $userId): ?ProgramMemberInfo
